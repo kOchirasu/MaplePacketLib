@@ -8,7 +8,7 @@ using MaplePacketLib.Crypto;
 using MaplePacketLib.Tools;
 
 namespace MaplePacketLib {
-    internal static class Auth {
+    public static class Auth {
         private const short AUTH_1 = 0x33;
         private const short AUTH_2 = 0x2D;
         private const short AUTH_3 = 0x35;
