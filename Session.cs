@@ -23,7 +23,7 @@ namespace MaplePacketLib {
         public readonly SessionType SessionType;
 
         private static int rngSeed = Environment.TickCount;
-        private readonly Socket socket;
+        private Socket socket;
         private MapleCipher clientCipher;
         private int cursor;
         private byte[] packetBuffer;
@@ -54,19 +54,21 @@ namespace MaplePacketLib {
             return Reconnect(new IPEndPoint(ip, port), timeout);
         }
 
-        public bool Reconnect(EndPoint remoteEp, int timeout = 10000) {
+        public bool Reconnect(EndPoint endPoint, int timeout = 10000) {
             if (!Connected) {
                 return false;
             }
 
             cursor = 0;
             socket.Shutdown(SocketShutdown.Both);
-            socket.Disconnect(true);
+            socket.Disconnect(false);
 
             Encrypted = false;
             Connected = false;
 
-            var handle = socket.BeginConnect(remoteEp, EndReconnect, socket); // Reconnect
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+            var handle = socket.BeginConnect(endPoint, EndReconnect, socket); // Reconnect
             handle.AsyncWaitHandle.WaitOne(timeout, true); // is true needed?
 
             return socket.Connected;

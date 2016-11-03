@@ -6,23 +6,21 @@ using MaplePacketLib.Crypto;
 
 namespace MaplePacketLib {
     public sealed class Connector {
-        private readonly IPAddress ip;
-        private readonly short port;
+        private readonly EndPoint endPoint;
         private readonly AesCipher aesCipher;
 
         public event EventHandler<Session> OnConnected;
         public event EventHandler<SocketError> OnError;
 
         public Connector(IPAddress ip, short port, AesCipher aesCipher) {
-            this.ip = ip;
-            this.port = port;
+            this.endPoint = new IPEndPoint(ip, port);
             this.aesCipher = aesCipher;
         }
 
         public void Connect(int timeout = 13000) {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
-            var iar = socket.BeginConnect(ip, port, EndConnect, socket);
+            var iar = socket.BeginConnect(endPoint, EndConnect, socket);
             iar.AsyncWaitHandle.WaitOne(timeout, true);
             if (!socket.Connected) {
                 socket.Close(); //Do I want to close the client?
